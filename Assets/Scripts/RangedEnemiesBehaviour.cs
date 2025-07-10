@@ -9,6 +9,13 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     public GameObject projectile;
     public float health;
 
+    //animations
+
+    [SerializeField]
+    Animator shootingAnimator;
+    Animator walkingAnimator;
+
+
     //Patroll
 
     public Vector3 walkPoint;
@@ -106,6 +113,7 @@ public class RangedEnemiesBehaviour : MonoBehaviour
             Rigidbody rb = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Rigidbody>();
             Physics.IgnoreCollision(rb.GetComponent<Collider>(), GetComponent<Collider>());
             transform.LookAt(player);
+            shootingAnimator.SetTrigger("PlayerInRange");
             rb.AddForce(transform.forward * 32f, ForceMode.Impulse);
             rb.AddForce(transform.up * 8f, ForceMode.Impulse);
             
