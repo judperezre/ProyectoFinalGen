@@ -1,13 +1,15 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemiesBehaviour : MonoBehaviour
+public class MeleeEnemiesBehaviour : MonoBehaviour
 {
     public NavMeshAgent agent;
     public Transform player;
     public LayerMask whatIsGround, whatIsPlayer;
-    public GameObject projectile;
     public float health;
+
+    public int damage = 10;
+    public bool canDamage;
 
     //Patroll
 
@@ -39,7 +41,7 @@ public class EnemiesBehaviour : MonoBehaviour
         {
             Patrolling();
         }
-        
+
         if (isPlayerInSightRange && !isPlayerInAttackRange)
         {
             ChasePlayer();
@@ -50,8 +52,10 @@ public class EnemiesBehaviour : MonoBehaviour
         }
     }
 
-    private void Patrolling() 
+    private void Patrolling()
     {
+        agent.isStopped = false;
+
         if (!walkPointSet)
         {
             SearchWalkPoint();
@@ -70,12 +74,12 @@ public class EnemiesBehaviour : MonoBehaviour
         }
     }
 
-    private void SearchWalkPoint() 
+    private void SearchWalkPoint()
     {
         float randomZ = Random.Range(-walkPointRange, walkPointRange);
         float randomX = Random.Range(-walkPointRange, walkPointRange);
 
-        walkPoint = new Vector3(transform.position.x + randomX,transform.position.y, transform.position.z + randomZ);
+        walkPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
 
         if (Physics.Raycast(walkPoint, -transform.up, 2f, whatIsGround))
         {
@@ -84,50 +88,43 @@ public class EnemiesBehaviour : MonoBehaviour
 
     }
 
-    private void ChasePlayer() 
+    private void ChasePlayer()
     {
+        agent.isStopped = false;
         agent.SetDestination(player.position);
     }
-    private void AttackPlayer() 
+    private void AttackPlayer()
     {
         //Make sure enemy doesn't move
-
-        agent.SetDestination(transform.position);
-
-        transform.LookAt(player);
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
 
 
         if (!alreadyAttacked)
         {
-
-            ///Attack code
-
-            Rigidbody rb = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Rigidbody>();
-            rb.AddForce(transform.forward * 32f, ForceMode.Impulse);
-            rb.AddForce(transform.up * 8f, ForceMode.Impulse);
-            ///
-
-
+            StartDamage();
+            OnTriggerEnter(player.GetComponent<Collider>());
             alreadyAttacked = true;
             Invoke(nameof(ResetAttack), timeBetweenAttacks);
         }
+
     }
 
-    private void ResetAttack() 
+    private void ResetAttack()
     {
         alreadyAttacked = false;
     }
 
-    public void TakeDamage(int damage) 
+    public void TakeDamage(int damage)
     {
         health -= damage;
 
-        if (health <= 0) 
+        if (health <= 0)
         {
             Invoke(nameof(DestroyEnemy), 0.5f);
         }
     }
-    public void DestroyEnemy() 
+    public void DestroyEnemy()
     {
         Destroy(gameObject);
     }
@@ -138,5 +135,29 @@ public class EnemiesBehaviour : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, attackRange);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, sightRange);
+    }
+
+    private void StartDamage() 
+    {
+        canDamage = true;
+        GetComponent<Collider>().enabled = true;
+    }
+    private void StopDamage()
+    {
+        canDamage = false;
+        GetComponent<Collider>().enabled = false;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (canDamage && other.CompareTag("Player"))
+        {
+            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
+            if (playerHealth != null) 
+            {
+                playerHealth.TakeDamage(damage);
+            }
+            StopDamage();
+        }
     }
 }
