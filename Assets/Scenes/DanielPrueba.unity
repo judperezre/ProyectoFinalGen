@@ -413,7 +413,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 894822543}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &446072289
+  --- !u!1001 &446072289
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -756,7 +756,7 @@ Transform:
   - {fileID: 1143006926}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &894822544
+  --- !u!114 &894822544
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1206,12 +1206,12 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: 
+  m_WarningMessage:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1029274338
+  --- !u!114 &1029274338
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1557,7 +1557,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 201706615}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
---- !u!1001 &1220174465
+  --- !u!1001 &1220174465
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -2191,7 +2191,7 @@ Terrain:
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3
---- !u!4 &1626380782
+  --- !u!4 &1626380782
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2206,7 +2206,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 894822543}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1637087172
+ --- !u!1001 &1637087172
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -2271,7 +2271,7 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1029274335}
     m_Modifications:
-    - target: {fileID: -9070493210130169274, guid: 10e4c71f5030287478b74d7146d100e9, type: 3}
+   - target: {fileID: -9070493210130169274, guid: 10e4c71f5030287478b74d7146d100e9, type: 3}
       propertyPath: m_Layer
       value: 3
       objectReference: {fileID: 0}
@@ -2463,7 +2463,7 @@ PrefabInstance:
       propertyPath: m_Name
       value: Maria WProp J J Ong@Walking
       objectReference: {fileID: 0}
-    - target: {fileID: 919132149155446097, guid: 10e4c71f5030287478b74d7146d100e9, type: 3}
+     - target: {fileID: 919132149155446097, guid: 10e4c71f5030287478b74d7146d100e9, type: 3}
       propertyPath: m_Layer
       value: 3
       objectReference: {fileID: 0}
@@ -2891,7 +2891,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 201706615}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
---- !u!1001 &2006954639
+  --- !u!1001 &2006954639
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
