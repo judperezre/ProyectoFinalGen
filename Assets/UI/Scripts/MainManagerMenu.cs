@@ -10,7 +10,7 @@ public class MainManagerMenu : MonoBehaviour
     public GameObject canvasMainMenu;
     public void Jugar()
     {
-        SceneManager.LoadScene("GameScene"); // reemplaza por el nombre de la escena del juego
+        SceneManager.LoadScene("DanielPrueba"); // reemplaza por el nombre de la escena del juego
     }
 
     public void ComoJugar()
