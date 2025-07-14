@@ -10,6 +10,7 @@ public class ProjectileScript : MonoBehaviour
     void Start()
     {
        player = GetComponent<Collider>();
+        Destroy(gameObject, 10f);
     }
 
     // Update is called once per frame

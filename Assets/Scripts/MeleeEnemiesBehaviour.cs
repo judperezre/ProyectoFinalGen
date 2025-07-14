@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,6 +11,11 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
     public int damage = 10;
     public bool canDamage;
+
+    //Animations
+    [SerializeField]
+    Animator meleeAttackAnimator;
+    public float rotationSpeed = 5f;
 
     //Patroll
 
@@ -32,22 +38,29 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
         player = GameObject.Find("Player").transform;
         agent = GetComponent<NavMeshAgent>();
     }
+
     private void Update()
     {
+        float speed = agent.velocity.magnitude;
+        meleeAttackAnimator.SetFloat("MoveSpeed", speed);
+
         isPlayerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
         isPlayerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
 
         if (!isPlayerInSightRange && !isPlayerInAttackRange)
         {
+            meleeAttackAnimator.SetBool("isPlayerInAttackRange", false);
             Patrolling();
         }
 
         if (isPlayerInSightRange && !isPlayerInAttackRange)
         {
+            meleeAttackAnimator.SetBool("isPlayerInAttackRange", false);
             ChasePlayer();
         }
         if (isPlayerInSightRange && isPlayerInAttackRange)
         {
+            meleeAttackAnimator.SetBool("isPlayerInAttackRange", true);
             AttackPlayer();
         }
     }
@@ -55,6 +68,14 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
     private void Patrolling()
     {
         agent.isStopped = false;
+
+        Vector3 dir = agent.steeringTarget - transform.position;
+
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
+        }
 
         if (!walkPointSet)
         {
@@ -98,12 +119,13 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
         //Make sure enemy doesn't move
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
+        meleeAttackAnimator.SetFloat("MoveSpeed", 0f);
 
 
         if (!alreadyAttacked)
         {
             StartDamage();
-            OnTriggerEnter(player.GetComponent<Collider>());
+            meleeAttackAnimator.SetBool("canAttack", true);
             alreadyAttacked = true;
             Invoke(nameof(ResetAttack), timeBetweenAttacks);
         }
@@ -137,7 +159,7 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, sightRange);
     }
 
-    private void StartDamage() 
+    private void StartDamage()
     {
         canDamage = true;
         GetComponent<Collider>().enabled = true;
@@ -153,11 +175,17 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
         if (canDamage && other.CompareTag("Player"))
         {
             PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
-            if (playerHealth != null) 
+            if (playerHealth != null)
             {
                 playerHealth.TakeDamage(damage);
             }
             StopDamage();
         }
     }
+
+    private void DamageToPlayer() 
+    {
+        OnTriggerEnter(player.GetComponent<Collider>());
+    }
+
 }
