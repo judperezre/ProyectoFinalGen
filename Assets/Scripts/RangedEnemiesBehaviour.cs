@@ -1,5 +1,7 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Assertions.Must;
 
 public class RangedEnemiesBehaviour : MonoBehaviour
 {
@@ -7,14 +9,14 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     public Transform player;
     public LayerMask whatIsGround, whatIsPlayer;
     public GameObject projectile;
+    public Transform arrowPoint;
     public float health;
 
     //animations
 
     [SerializeField]
     Animator shootingAnimator;
-    Animator walkingAnimator;
-
+    public float rotationSpeed = 5f;
 
     //Patroll
 
@@ -39,16 +41,21 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     }
     private void Update()
     {
+        float speed = agent.velocity.magnitude;
+        shootingAnimator.SetFloat("MoveSpeed", speed);
+
         isPlayerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
         isPlayerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
 
         if (!isPlayerInSightRange && !isPlayerInAttackRange)
         {
+            shootingAnimator.SetBool("isPlayerInAttackRange", false);
             Patrolling();
         }
-        
+
         if (isPlayerInSightRange && !isPlayerInAttackRange)
         {
+            shootingAnimator.SetBool("isPlayerInAttackRange", false);
             ChasePlayer();
         }
         if (isPlayerInSightRange && isPlayerInAttackRange)
@@ -57,9 +64,15 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         }
     }
 
-    private void Patrolling() 
+    private void Patrolling()
     {
-        agent.isStopped = false;
+        Vector3 dir = agent.steeringTarget - transform.position;
+
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
+        }
 
         if (!walkPointSet)
         {
@@ -69,6 +82,7 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         if (walkPointSet)
         {
             agent.SetDestination(walkPoint);
+
         }
 
         Vector3 distanceToWalkPoint = transform.position - walkPoint;
@@ -79,12 +93,12 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         }
     }
 
-    private void SearchWalkPoint() 
+    private void SearchWalkPoint()
     {
         float randomZ = Random.Range(-walkPointRange, walkPointRange);
         float randomX = Random.Range(-walkPointRange, walkPointRange);
 
-        walkPoint = new Vector3(transform.position.x + randomX,transform.position.y, transform.position.z + randomZ);
+        walkPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
 
         if (Physics.Raycast(walkPoint, -transform.up, 2f, whatIsGround))
         {
@@ -93,12 +107,14 @@ public class RangedEnemiesBehaviour : MonoBehaviour
 
     }
 
-    private void ChasePlayer() 
-    {   
+    private void ChasePlayer()
+    {
+        
         agent.isStopped = false;
         agent.SetDestination(player.position);
+
     }
-    private void AttackPlayer() 
+    private void AttackPlayer()
     {
         //Make sure enemy doesn't move
         agent.isStopped = true;
@@ -110,37 +126,36 @@ public class RangedEnemiesBehaviour : MonoBehaviour
 
             ///Ranged Attack code:
 
-            Rigidbody rb = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Rigidbody>();
-            Physics.IgnoreCollision(rb.GetComponent<Collider>(), GetComponent<Collider>());
+
             transform.LookAt(player);
-            shootingAnimator.SetTrigger("PlayerInRange");
-            rb.AddForce(transform.forward * 32f, ForceMode.Impulse);
-            rb.AddForce(transform.up * 8f, ForceMode.Impulse);
-            
+            shootingAnimator.SetBool("isPlayerInAttackRange", true);
+            shootingAnimator.SetFloat("MoveSpeed", 0f);
+
             ///
 
 
             alreadyAttacked = true;
             Invoke(nameof(ResetAttack), timeBetweenAttacks);
         }
-        
+
     }
 
-    private void ResetAttack() 
+    private void ResetAttack()
     {
         alreadyAttacked = false;
     }
 
-    public void TakeDamage(int damage) 
+    public void TakeDamage(int damage)
     {
         health -= damage;
 
-        if (health <= 0) 
+        if (health <= 0)
         {
-            Invoke(nameof(DestroyEnemy), 0.5f);
+            shootingAnimator.SetBool("isdDead", true);
+            Invoke(nameof(DestroyEnemy), 10f);
         }
     }
-    public void DestroyEnemy() 
+    public void DestroyEnemy()
     {
         Destroy(gameObject);
     }
@@ -151,6 +166,20 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, attackRange);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, sightRange);
+
+        if (walkPoint != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(walkPoint, 0.25f);
+        }
+    }
+
+    public void ShootingArrow()
+    {
+        GameObject arrow = Instantiate(projectile, arrowPoint.position, Quaternion.identity, arrowPoint);
+        arrow.transform.parent = null;
+        arrow.GetComponent<Rigidbody>().AddForce(transform.forward * 25f, ForceMode.Impulse);
+        arrow.GetComponent<Rigidbody>().AddForce(transform.up * 8f, ForceMode.Impulse);
     }
 
 }

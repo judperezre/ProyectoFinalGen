@@ -141,7 +141,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 7647305648010562342}
-  player: {fileID: 0}
+  player: {fileID: 5735011443888010012, guid: 8bb9a0a94e32fd8418fa31f5ffc4bc20, type: 3}
   whatIsGround:
     serializedVersion: 2
     m_Bits: 64
@@ -149,13 +149,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   projectile: {fileID: 5462181201794676206, guid: 04aa4d902ac7119449f1c3cdccf39297, type: 3}
+  arrowPoint: {fileID: 9145271527201609119}
   health: 5
   shootingAnimator: {fileID: 3362822579983321135}
   walkPoint: {x: 0, y: 0, z: 0}
   walkPointRange: 5
   timeBetweenAttacks: 3
-  sightRange: 25
-  attackRange: 25
+  sightRange: 15
+  attackRange: 12
   isPlayerInSightRange: 0
   isPlayerInAttackRange: 0
 --- !u!54 &6495014462978201188
@@ -180,8 +181,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -207,6 +208,37 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &7940720221856980971
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9145271527201609119}
+  m_Layer: 0
+  m_Name: ArrowPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9145271527201609119
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7940720221856980971}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.027, y: 0.162, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1148972624042462511}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &6182769748788484332
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -259,11 +291,27 @@ PrefabInstance:
       propertyPath: m_Name
       value: X Bot@Shooting Arrow
       objectReference: {fileID: 0}
+    - target: {fileID: 6148737315974723067, guid: a2039d8b36bba3746b98ad1fe8a273e4, type: 3}
+      propertyPath: 'm_Bones.Array.data[50]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6148737315974723067, guid: a2039d8b36bba3746b98ad1fe8a273e4, type: 3}
+      propertyPath: 'm_Bones.Array.data[51]'
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6502182839619065283, guid: a2039d8b36bba3746b98ad1fe8a273e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9145271527201609119}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a2039d8b36bba3746b98ad1fe8a273e4, type: 3}
+--- !u!4 &1148972624042462511 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6502182839619065283, guid: a2039d8b36bba3746b98ad1fe8a273e4, type: 3}
+  m_PrefabInstance: {fileID: 6182769748788484332}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5928748293859114759 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a2039d8b36bba3746b98ad1fe8a273e4, type: 3}
