@@ -67,6 +67,7 @@ public class PlayerController : MonoBehaviour
     private float verticalVelocity = 0f;
     private float yaw = 0f;
     private float pitch = 0f;
+    private bool isDead = false;
 
     void Start()
     {
@@ -95,6 +96,14 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // Si está muerto, solo aplica gravedad para caer al suelo
+        if (isDead)
+        {
+            verticalVelocity += Physics.gravity.y * Time.deltaTime;
+            controller.Move(new Vector3(0f, verticalVelocity, 0f) * Time.deltaTime);
+            return;
+        }
+
         // Entrada de movimiento
         float inputX = Input.GetAxis("Horizontal");
         float inputZ = Input.GetAxis("Vertical");
@@ -109,6 +118,9 @@ public class PlayerController : MonoBehaviour
             Vector3 camR = cameraTransform.right; camR.y = 0f; camR.Normalize();
             moveDir = (camF * inputDir.z + camR * inputDir.x).normalized * inputDir.magnitude;
             transform.forward = moveDir;
+            // Run animation
+            bool isRunning = Input.GetKey(KeyCode.LeftShift) && moveDir.magnitude > 0.01f;
+            animator.SetBool("Run", isRunning);
         }
 
         // Idle/Walk
@@ -233,7 +245,13 @@ public class PlayerController : MonoBehaviour
     private void Die()
     {
         animator.SetTrigger("Die");
-        controller.enabled = false;
+        isDead = true;
+        // Al morir, ajusta posición para quedar en el suelo
+        SnapToGround();
+        {
+            animator.SetTrigger("Die");
+            isDead = true;
+        }
     }
 
     private void StartRoll()
@@ -248,8 +266,23 @@ public class PlayerController : MonoBehaviour
         controller.center = originalCenter;
     }
 
+    // Ajusta personaje al suelo tras morir
+    private void SnapToGround()
+    {
+        RaycastHit hit;
+        // Raycast desde un poco arriba para evitar colisión inmediata
+        if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit, 10f))
+        {
+            Vector3 p = transform.position;
+            p.y = hit.point.y;
+            transform.position = p;
+        }
+    }
+
     public void RecoverEnergy(float amount)
     {
-        currentEnergy = Mathf.Min(maxEnergy, currentEnergy + amount);
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        if (healthSlider != null)
+            healthSlider.value = currentHealth;
     }
 }
