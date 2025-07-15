@@ -7,6 +7,7 @@ TagManager:
   - Ground
   - RangedEnemy
   - MeleeEnemy
+  - Projectile
   layers:
   - Default
   - TransparentFX
