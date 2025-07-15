@@ -8,6 +8,7 @@ public class MainManagerMenu : MonoBehaviour
     public GameObject panelCreditos;
     public GameObject panelHistoria;
     public GameObject canvasImage;
+    public GameObject canvasLogo;
     public GameObject canvasMainMenu;
 
     public void Jugar()
@@ -30,6 +31,7 @@ public class MainManagerMenu : MonoBehaviour
     {
         panelComoJugar.SetActive(false);
         canvasImage.SetActive(true);
+        canvasLogo.SetActive(true);
         canvasMainMenu.SetActive(true);
     }
     public void Historia()
@@ -45,6 +47,7 @@ public class MainManagerMenu : MonoBehaviour
     {
         panelHistoria.SetActive(false);
         canvasImage.SetActive(true);
+        canvasLogo.SetActive(true);
         canvasMainMenu.SetActive(true);
     }
 
@@ -60,6 +63,7 @@ public class MainManagerMenu : MonoBehaviour
     {
         panelCreditos.SetActive(false);
         canvasImage.SetActive(true);
+        canvasLogo.SetActive(true);
         canvasMainMenu.SetActive(true);
     }
 
@@ -68,6 +72,7 @@ public class MainManagerMenu : MonoBehaviour
         yield return new WaitForSeconds(0.1f); // Espera un poco para que suene el clic
         //mainPanel.SetActive(false);
         canvasImage.SetActive(false);
+        canvasLogo.SetActive(false);
         canvasMainMenu.SetActive(false);
         panelNuevo.SetActive(true);
     }
