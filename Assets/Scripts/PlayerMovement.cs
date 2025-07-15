@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,16 +16,32 @@ public class PlayerController : MonoBehaviour
     public float runSpeed = 10f;
     public float jumpHeight = 2f;
 
+    // ROLL COLLIDER
+    [Header("Roll Collider")]
+    public float rollHeight = 1f;
+    public Vector3 rollCenterOffset = new Vector3(0f, 0.5f, 0f);
+    private float originalHeight;
+    private Vector3 originalCenter;
+
     // DASH
     [Header("Dash")]
     public float dashSpeed = 20f;
     public float dashDuration = 0.2f;
     public float dashTapTime = 0.2f;
+    public float dashDistanceFactor = 0.5f;
     private float dashTapTimer = 0f;
     private bool dashInputReady = false;
     private bool isDashing = false;
     private float dashTimeLeft = 0f;
     private Vector3 dashDirection;
+
+    // VIDA
+    [Header("Vida")]
+    public float maxHealth = 100f;
+    private float currentHealth;
+    public Slider healthSlider;
+    public float projectileDamage = 10f;
+    public float meleeDamage = 20f;
 
     // ENERGÍA
     [Header("Energía")]
@@ -58,11 +75,22 @@ public class PlayerController : MonoBehaviour
         dashTrail = GetComponent<TrailRenderer>();
         if (dashTrail != null) dashTrail.emitting = false;
 
+        originalHeight = controller.height;
+        originalCenter = controller.center;
+
         if (cameraTransform == null && Camera.main != null)
             cameraTransform = Camera.main.transform;
 
         yaw = transform.eulerAngles.y;
         pitch = 0f;
+
+        // Inicializar vida
+        currentHealth = maxHealth;
+        if (healthSlider != null)
+        {
+            healthSlider.maxValue = maxHealth;
+            healthSlider.value = currentHealth;
+        }
     }
 
     void Update()
@@ -106,13 +134,14 @@ public class PlayerController : MonoBehaviour
             moveDir *= runSpeed / walkSpeed;
         if (Input.GetKeyUp(KeyCode.LeftShift) && dashInputReady && dashTapTimer < dashTapTime)
         {
-            if (currentEnergy >= dashCost)
+            if (currentHealth > dashCost)
             {
                 isDashing = true;
                 dashTimeLeft = dashDuration;
                 currentEnergy -= dashCost;
-                dashDirection = moveDir.magnitude > 0f ? moveDir : transform.forward;
+                dashDirection = (moveDir.magnitude > 0f ? moveDir : transform.forward) * dashDistanceFactor;
                 if (dashTrail != null) dashTrail.emitting = true;
+                StartRoll();
                 animator.SetTrigger("Roll");
             }
             dashInputReady = false;
@@ -136,6 +165,7 @@ public class PlayerController : MonoBehaviour
             {
                 isDashing = false;
                 if (dashTrail != null) dashTrail.emitting = false;
+                EndRoll();
             }
         }
         controller.Move(velocity * Time.deltaTime);
@@ -177,7 +207,47 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Recuperar energía al matar enemigos
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Projectile"))
+        {
+            TakeDamage(projectileDamage);
+            Destroy(other.gameObject);
+        }
+        else if (other.CompareTag("MeleeEnemy"))
+        {
+            TakeDamage(meleeDamage);
+        }
+    }
+
+    public void TakeDamage(float amount)
+    {
+        currentHealth -= amount;
+        if (healthSlider != null)
+            healthSlider.value = currentHealth;
+
+        if (currentHealth <= 0f)
+            Die();
+    }
+
+    private void Die()
+    {
+        animator.SetTrigger("Die");
+        controller.enabled = false;
+    }
+
+    private void StartRoll()
+    {
+        controller.height = rollHeight;
+        controller.center = rollCenterOffset;
+    }
+
+    private void EndRoll()
+    {
+        controller.height = originalHeight;
+        controller.center = originalCenter;
+    }
+
     public void RecoverEnergy(float amount)
     {
         currentEnergy = Mathf.Min(maxEnergy, currentEnergy + amount);
