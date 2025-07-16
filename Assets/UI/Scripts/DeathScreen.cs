@@ -33,7 +33,7 @@ public class DeathScreen : MonoBehaviour
 
     void Start()
     {
-        deathPanel.SetActive(true); // Oculto al iniciar
+        deathPanel.SetActive(false); // Oculto al iniciar
         restartButton.onClick.AddListener(RestartGame);
     }
 
