@@ -68,6 +68,7 @@ public class PlayerController : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private bool isDead = false;
+    private bool wasGrounded = true; // Control de aterrizaje
 
     void Start()
     {
@@ -96,11 +97,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // Si está muerto, solo aplica gravedad para caer al suelo
         if (isDead)
         {
-            verticalVelocity += Physics.gravity.y * Time.deltaTime;
-            controller.Move(new Vector3(0f, verticalVelocity, 0f) * Time.deltaTime);
+            // No procesar más al morir
             return;
         }
 
@@ -109,6 +108,22 @@ public class PlayerController : MonoBehaviour
         float inputZ = Input.GetAxis("Vertical");
         Vector3 inputDir = new Vector3(inputX, 0f, inputZ);
         inputDir = Vector3.ClampMagnitude(inputDir, 1f);
+
+        // Gestión del salto
+        bool isGrounded = controller.isGrounded;
+        // Detecta aterrizaje: resetea Jump y verticalVelocity
+        if (isGrounded && !wasGrounded)
+        {
+            animator.SetBool("Jump", false);
+            verticalVelocity = -0.5f;
+        }
+        // Inicia salto
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(Physics.gravity.y) * jumpHeight);
+            animator.SetBool("Jump", true);
+        }
+        wasGrounded = isGrounded;
 
         // Calcula moveDir según cámara
         Vector3 moveDir = Vector3.zero;
@@ -126,17 +141,7 @@ public class PlayerController : MonoBehaviour
         // Idle/Walk
         animator.SetFloat("Speed", moveDir.magnitude);
 
-        // Salto
-        bool isGrounded = controller.isGrounded;
-        if (isGrounded && verticalVelocity < 0f)
-            verticalVelocity = -0.5f;
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(Physics.gravity.y) * jumpHeight);
-            animator.SetTrigger("Jump");
-        }
-
-        // Dash
+        // Dash input
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             dashTapTimer = 0f;
@@ -146,7 +151,7 @@ public class PlayerController : MonoBehaviour
             moveDir *= runSpeed / walkSpeed;
         if (Input.GetKeyUp(KeyCode.LeftShift) && dashInputReady && dashTapTimer < dashTapTime)
         {
-            if (currentHealth > dashCost)
+            if (currentEnergy >= dashCost)
             {
                 isDashing = true;
                 dashTimeLeft = dashDuration;
@@ -164,7 +169,7 @@ public class PlayerController : MonoBehaviour
             if (dashTapTimer >= dashTapTime) dashInputReady = false;
         }
 
-        // Gravedad y movimiento
+        // Aplica gravedad y movimiento
         verticalVelocity += Physics.gravity.y * Time.deltaTime;
         Vector3 velocity = moveDir * walkSpeed;
         velocity.y = verticalVelocity;
@@ -206,7 +211,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Cámara
+        // Cámara seguimiento
         float mX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
         yaw += mX; pitch = Mathf.Clamp(pitch - mY, -30f, 60f);
@@ -246,12 +251,6 @@ public class PlayerController : MonoBehaviour
     {
         animator.SetTrigger("Die");
         isDead = true;
-        // Al morir, ajusta posición para quedar en el suelo
-        SnapToGround();
-        {
-            animator.SetTrigger("Die");
-            isDead = true;
-        }
     }
 
     private void StartRoll()
@@ -270,7 +269,6 @@ public class PlayerController : MonoBehaviour
     private void SnapToGround()
     {
         RaycastHit hit;
-        // Raycast desde un poco arriba para evitar colisión inmediata
         if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit, 10f))
         {
             Vector3 p = transform.position;
