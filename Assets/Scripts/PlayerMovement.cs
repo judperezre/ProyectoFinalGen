@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     public Transform cameraTransform;
     public GameObject powerPrefab;
+    
+    
 
     // MOVIMIENTO
     [Header("Movimiento")]
@@ -42,6 +44,8 @@ public class PlayerController : MonoBehaviour
     public Slider healthSlider;
     public float projectileDamage = 10f;
     public float meleeDamage = 20f;
+    public DeathScreen deathScreen;
+
 
     // ENERGÍA
     [Header("Energía")]
@@ -249,8 +253,11 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
+
+        deathScreen.ShowDeathScreen();
         animator.SetTrigger("Die");
         isDead = true;
+        
     }
 
     private void StartRoll()
