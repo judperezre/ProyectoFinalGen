@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/Scenes/SceneHouse.unity
     guid: 7e253550a6f4e3440a5e6b8269d19710
   - enabled: 1
+    path: Assets/Scenes/Main.unity
+    guid: c33d2af6462cd294c8eae0f2244691a2
+  - enabled: 0
     path: Assets/Scenes/DanielPrueba.unity
     guid: 0e00a37444cb59748a34561c6ee67052
   m_configObjects:

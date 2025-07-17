@@ -4298,7 +4298,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 528122966919333717, guid: ec2b1573e774af9468f4ec7c27a08e7b, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ec2b1573e774af9468f4ec7c27a08e7b, type: 3}
@@ -9772,6 +9773,14 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9135762116998727536, guid: f3126d3f9b347884db9a6828988aa31f, type: 3}
+      propertyPath: maxHealth
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135762116998727536, guid: f3126d3f9b347884db9a6828988aa31f, type: 3}
+      propertyPath: cameraTransform
+      value: 
+      objectReference: {fileID: 582546732}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9951,7 +9960,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2af9ed3c35ea5bb4a8fc442c68f8e394, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneToLoad: DanielPrueba
+  sceneToLoad: Main
 --- !u!4 &1462483538 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 409632, guid: 471c1eb32c770a54ea8a1c3ffbda1de6, type: 3}
