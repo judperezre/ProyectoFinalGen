@@ -67,6 +67,8 @@ public class PlayerController : MonoBehaviour
     private float verticalVelocity = 0f;
     private float yaw = 0f;
     private float pitch = 0f;
+    private bool isDead = false;
+    private bool wasGrounded = true; // Control de aterrizaje
 
     void Start()
     {
@@ -95,11 +97,33 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (isDead)
+        {
+            // No procesar más al morir
+            return;
+        }
+
         // Entrada de movimiento
         float inputX = Input.GetAxis("Horizontal");
         float inputZ = Input.GetAxis("Vertical");
         Vector3 inputDir = new Vector3(inputX, 0f, inputZ);
         inputDir = Vector3.ClampMagnitude(inputDir, 1f);
+
+        // Gestión del salto
+        bool isGrounded = controller.isGrounded;
+        // Detecta aterrizaje: resetea Jump y verticalVelocity
+        if (isGrounded && !wasGrounded)
+        {
+            animator.SetBool("Jump", false);
+            verticalVelocity = -0.5f;
+        }
+        // Inicia salto
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(Physics.gravity.y) * jumpHeight);
+            animator.SetBool("Jump", true);
+        }
+        wasGrounded = isGrounded;
 
         // Calcula moveDir según cámara
         Vector3 moveDir = Vector3.zero;
@@ -109,22 +133,15 @@ public class PlayerController : MonoBehaviour
             Vector3 camR = cameraTransform.right; camR.y = 0f; camR.Normalize();
             moveDir = (camF * inputDir.z + camR * inputDir.x).normalized * inputDir.magnitude;
             transform.forward = moveDir;
+            // Run animation
+            bool isRunning = Input.GetKey(KeyCode.LeftShift) && moveDir.magnitude > 0.01f;
+            animator.SetBool("Run", isRunning);
         }
 
         // Idle/Walk
         animator.SetFloat("Speed", moveDir.magnitude);
 
-        // Salto
-        bool isGrounded = controller.isGrounded;
-        if (isGrounded && verticalVelocity < 0f)
-            verticalVelocity = -0.5f;
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(Physics.gravity.y) * jumpHeight);
-            animator.SetTrigger("Jump");
-        }
-
-        // Dash
+        // Dash input
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             dashTapTimer = 0f;
@@ -134,7 +151,7 @@ public class PlayerController : MonoBehaviour
             moveDir *= runSpeed / walkSpeed;
         if (Input.GetKeyUp(KeyCode.LeftShift) && dashInputReady && dashTapTimer < dashTapTime)
         {
-            if (currentHealth > dashCost)
+            if (currentEnergy >= dashCost)
             {
                 isDashing = true;
                 dashTimeLeft = dashDuration;
@@ -152,7 +169,7 @@ public class PlayerController : MonoBehaviour
             if (dashTapTimer >= dashTapTime) dashInputReady = false;
         }
 
-        // Gravedad y movimiento
+        // Aplica gravedad y movimiento
         verticalVelocity += Physics.gravity.y * Time.deltaTime;
         Vector3 velocity = moveDir * walkSpeed;
         velocity.y = verticalVelocity;
@@ -194,7 +211,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Cámara
+        // Cámara seguimiento
         float mX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
         yaw += mX; pitch = Mathf.Clamp(pitch - mY, -30f, 60f);
@@ -233,7 +250,7 @@ public class PlayerController : MonoBehaviour
     private void Die()
     {
         animator.SetTrigger("Die");
-        controller.enabled = false;
+        isDead = true;
     }
 
     private void StartRoll()
@@ -248,8 +265,22 @@ public class PlayerController : MonoBehaviour
         controller.center = originalCenter;
     }
 
+    // Ajusta personaje al suelo tras morir
+    private void SnapToGround()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit, 10f))
+        {
+            Vector3 p = transform.position;
+            p.y = hit.point.y;
+            transform.position = p;
+        }
+    }
+
     public void RecoverEnergy(float amount)
     {
-        currentEnergy = Mathf.Min(maxEnergy, currentEnergy + amount);
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        if (healthSlider != null)
+            healthSlider.value = currentHealth;
     }
 }

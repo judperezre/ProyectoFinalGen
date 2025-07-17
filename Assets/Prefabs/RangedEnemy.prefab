@@ -152,6 +152,7 @@ MonoBehaviour:
   arrowPoint: {fileID: 9145271527201609119}
   health: 5
   shootingAnimator: {fileID: 3362822579983321135}
+  rotationSpeed: 5
   walkPoint: {x: 0, y: 0, z: 0}
   walkPointRange: 5
   timeBetweenAttacks: 3
