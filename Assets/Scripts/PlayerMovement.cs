@@ -42,6 +42,7 @@ public class PlayerController : MonoBehaviour
     public Slider healthSlider;
     public float projectileDamage = 10f;
     public float meleeDamage = 20f;
+    
 
     // ENERGÍA
     [Header("Energía")]
@@ -249,8 +250,11 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
+        
         animator.SetTrigger("Die");
         isDead = true;
+
+       
     }
 
     private void StartRoll()

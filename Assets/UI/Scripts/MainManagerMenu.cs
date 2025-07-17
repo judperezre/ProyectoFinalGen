@@ -15,7 +15,7 @@ public class MainManagerMenu : MonoBehaviour
     {
         AudioManager.Instance.PlayPlaySound(); // ← sonido especial solo para Jugar
         //StartCoroutine(CambiarPanelConDelay(setupPanel));
-        SceneManager.LoadScene("Enemies"); // reemplaza por el nombre de la escena del juego
+        SceneManager.LoadScene("SceneHouse"); // reemplaza por el nombre de la escena del juego
     }
 
     public void ComoJugar()
