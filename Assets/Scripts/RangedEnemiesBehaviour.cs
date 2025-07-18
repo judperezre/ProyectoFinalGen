@@ -89,7 +89,6 @@ public class RangedEnemiesBehaviour : MonoBehaviour
 
                 if (Physics.Raycast(ray, out hit, 2f, whatIsGround))
                 {
-                    Debug.Log("Raycast hit: " + hit.collider.gameObject.name);
 
                     Vector3 normal = hit.normal;
                     Quaternion lookRotation = Quaternion.LookRotation(dir, normal);
@@ -244,7 +243,6 @@ public class RangedEnemiesBehaviour : MonoBehaviour
 
         if (distanceToWalkPoint.magnitude >= 1f)
         {
-            Debug.Log("No se pudo alcanzar el punto, buscando uno nuevo.");
             walkPointSet = false;
         }
 

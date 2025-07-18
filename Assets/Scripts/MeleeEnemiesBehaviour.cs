@@ -12,6 +12,7 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
     public int damage = 10;
     public bool canDamage;
+    public bool isIdleDone;
 
     //Animations
     [SerializeField]
@@ -51,8 +52,14 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
         if (!isPlayerInSightRange && !isPlayerInAttackRange)
         {
+            if (speed < 0.8f && isIdleDone == false)
+            {
+                StartCoroutine("IdleTimer");
+            }
+            
             meleeAttackAnimator.SetBool("isPlayerInAttackRange", false);
             Patrolling();
+            isIdleDone = false;
         }
 
         if (isPlayerInSightRange && !isPlayerInAttackRange)
@@ -65,8 +72,9 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
             meleeAttackAnimator.SetBool("isPlayerInAttackRange", true);
             AttackPlayer();
         }
+        
 
-        AlignToGround();
+            AlignToGround();
     }
 
     private void Patrolling()
@@ -90,7 +98,6 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
                 if (Physics.Raycast(ray, out hit, 2f, whatIsGround))
                 {
-                    Debug.Log("Raycast hit: " + hit.collider.gameObject.name);
 
                     Vector3 normal = hit.normal;
                     Quaternion lookRotation = Quaternion.LookRotation(dir, normal);
@@ -102,7 +109,6 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
                 }
             }
 
-            // Si no hay una corutina de timeout activa, arrancarla
             if (walkPointTimeoutCoroutine == null)
             {
                 walkPointTimeoutCoroutine = StartCoroutine(WalkPointTimeout());
@@ -115,7 +121,6 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
         {
             walkPointSet = false;
 
-            // Cancelar la corutina si llegó bien
             if (walkPointTimeoutCoroutine != null)
             {
                 StopCoroutine(walkPointTimeoutCoroutine);
@@ -142,6 +147,7 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
     private void ChasePlayer()
     {
+        transform.LookAt(player);
         agent.isStopped = false;
         agent.SetDestination(player.position);
         AlignToGround();
@@ -149,10 +155,20 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
     private void AttackPlayer()
     {
         //Make sure enemy doesn't move
+        transform.LookAt(player);
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
         meleeAttackAnimator.SetFloat("MoveSpeed", 0f);
+        
+        //Enemy inclination while attacking
 
+        Vector3 direction = player.position - transform.position;
+        direction.y = 0f;
+
+        if (direction != Vector3.zero) 
+        {
+            transform.rotation = Quaternion.LookRotation(direction);
+        }
 
         if (!alreadyAttacked)
         {
@@ -240,6 +256,16 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
         }
     }
 
+    private IEnumerator IdleTimer() 
+    {
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        meleeAttackAnimator.SetFloat("MoveSpeed", 0f);
+
+        yield return new WaitForSeconds(10f);
+        isIdleDone = true;
+        agent.isStopped = false;
+    }
     private IEnumerator WalkPointTimeout()
     {
         yield return new WaitForSeconds(5f);
