@@ -7,10 +7,9 @@ public class PlayerController : MonoBehaviour
     private CharacterController controller;
     private TrailRenderer dashTrail;
     private Animator animator;
+    private AudioSource audioSource;
     public Transform cameraTransform;
     public GameObject powerPrefab;
-    
-    
 
     // MOVIMIENTO
     [Header("Movimiento")]
@@ -46,7 +45,6 @@ public class PlayerController : MonoBehaviour
     public float meleeDamage = 20f;
     public DeathScreen deathScreen;
 
-
     // ENERGÍA
     [Header("Energía")]
     public float maxEnergy = 100f;
@@ -61,6 +59,20 @@ public class PlayerController : MonoBehaviour
     public float specialCooldown = 3f;
     private float specialCooldownTimer = 0f;
 
+    // AUDIO
+    [Header("Audio")]
+    public AudioClip attackClip;
+    public AudioClip walkClip;
+    public AudioClip runClip;
+    public AudioClip dashClip;
+    private bool isWalkingAudio = false;
+    private bool isRunningAudio = false;
+
+    // TRABAJO (animación Working)
+    [Header("Trabajo")]
+    [Tooltip("Distancia para activar Working al acercarse a objetos con tags específicos")]
+    public float workRange = 1f;
+
     // CÁMARA
     [Header("Cámara")]
     public float mouseSensitivity = 100f;
@@ -72,13 +84,14 @@ public class PlayerController : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
     private bool isDead = false;
-    private bool wasGrounded = true; // Control de aterrizaje
+    private bool wasGrounded = true;
 
     void Start()
     {
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
         dashTrail = GetComponent<TrailRenderer>();
+        audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
         if (dashTrail != null) dashTrail.emitting = false;
 
         originalHeight = controller.height;
@@ -90,7 +103,6 @@ public class PlayerController : MonoBehaviour
         yaw = transform.eulerAngles.y;
         pitch = 0f;
 
-        // Inicializar vida
         currentHealth = maxHealth;
         if (healthSlider != null)
         {
@@ -101,11 +113,20 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (isDead)
+        if (isDead) return;
+
+        // Detectar actividad de trabajo
+        bool working = false;
+        Collider[] workCols = Physics.OverlapSphere(transform.position, workRange);
+        foreach (var col in workCols)
         {
-            // No procesar más al morir
-            return;
+            if (col.CompareTag("Tomatoes") || col.CompareTag("Grass") || col.CompareTag("Gallina"))
+            {
+                working = true;
+                break;
+            }
         }
+        animator.SetBool("Working", working);
 
         // Entrada de movimiento
         float inputX = Input.GetAxis("Horizontal");
@@ -115,13 +136,15 @@ public class PlayerController : MonoBehaviour
 
         // Gestión del salto
         bool isGrounded = controller.isGrounded;
-        // Detecta aterrizaje: resetea Jump y verticalVelocity
+
+        // 1) Aterrizaje: reset del bool Jump
         if (isGrounded && !wasGrounded)
         {
             animator.SetBool("Jump", false);
             verticalVelocity = -0.5f;
         }
-        // Inicia salto
+
+        // 2) Inicio de salto al presionar Espacio
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(Physics.gravity.y) * jumpHeight);
@@ -137,15 +160,33 @@ public class PlayerController : MonoBehaviour
             Vector3 camR = cameraTransform.right; camR.y = 0f; camR.Normalize();
             moveDir = (camF * inputDir.z + camR * inputDir.x).normalized * inputDir.magnitude;
             transform.forward = moveDir;
-            // Run animation
-            bool isRunning = Input.GetKey(KeyCode.LeftShift) && moveDir.magnitude > 0.01f;
-            animator.SetBool("Run", isRunning);
+
+            // Animaciones y sonidos de caminar/correr
+            bool running = Input.GetKey(KeyCode.LeftShift);
+            bool walking = !running;
+            animator.SetBool("Run", running);
+
+            if (walking && moveDir.magnitude > 0.01f && !isWalkingAudio)
+            {
+                if (walkClip != null) audioSource.PlayOneShot(walkClip);
+                isWalkingAudio = true;
+            }
+            else if (!walking)
+                isWalkingAudio = false;
+
+            if (running && moveDir.magnitude > 0.01f && !isRunningAudio)
+            {
+                if (runClip != null) audioSource.PlayOneShot(runClip);
+                isRunningAudio = true;
+            }
+            else if (!running)
+                isRunningAudio = false;
         }
 
-        // Idle/Walk
+        // Parámetro Speed para Idle/Walk
         animator.SetFloat("Speed", moveDir.magnitude);
 
-        // Dash input
+        // Dash
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             dashTapTimer = 0f;
@@ -162,6 +203,7 @@ public class PlayerController : MonoBehaviour
                 currentEnergy -= dashCost;
                 dashDirection = (moveDir.magnitude > 0f ? moveDir : transform.forward) * dashDistanceFactor;
                 if (dashTrail != null) dashTrail.emitting = true;
+                if (dashClip != null) audioSource.PlayOneShot(dashClip);
                 StartRoll();
                 animator.SetTrigger("Roll");
             }
@@ -173,7 +215,7 @@ public class PlayerController : MonoBehaviour
             if (dashTapTimer >= dashTapTime) dashInputReady = false;
         }
 
-        // Aplica gravedad y movimiento
+        // Gravedad y movimiento
         verticalVelocity += Physics.gravity.y * Time.deltaTime;
         Vector3 velocity = moveDir * walkSpeed;
         velocity.y = verticalVelocity;
@@ -191,9 +233,12 @@ public class PlayerController : MonoBehaviour
         }
         controller.Move(velocity * Time.deltaTime);
 
-        // Ataque
+        // Ataque básico
         if (Input.GetMouseButtonDown(0))
+        {
             animator.SetTrigger("Attack");
+            if (attackClip != null) audioSource.PlayOneShot(attackClip);
+        }
 
         // Cooldown especial
         if (specialCooldownTimer > 0f)
@@ -207,6 +252,9 @@ public class PlayerController : MonoBehaviour
             animator.SetTrigger("Spell");
             if (powerPrefab != null)
             {
+
+
+
                 Vector3 sp = transform.position + Vector3.up * 1.2f + transform.forward * 1f;
                 Quaternion sr = Quaternion.LookRotation(transform.forward);
                 GameObject proj = Instantiate(powerPrefab, sp, sr);
@@ -253,11 +301,9 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
-
         deathScreen.ShowDeathScreen();
         animator.SetTrigger("Die");
         isDead = true;
-        
     }
 
     private void StartRoll()
@@ -290,4 +336,8 @@ public class PlayerController : MonoBehaviour
         if (healthSlider != null)
             healthSlider.value = currentHealth;
     }
+
+    
+
+
 }
