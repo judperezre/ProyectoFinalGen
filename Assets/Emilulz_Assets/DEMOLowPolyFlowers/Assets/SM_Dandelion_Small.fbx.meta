@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Dandelion_Small.fbx.meta
 guid: 49f1eb77d1eac2b4b951528b0b494a91
+========
+guid: 489134b2de1e664459f59d89a80b895f
+>>>>>>>> 8f130a905a8ccedee34efcf418e80718b9b533f0:Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Hyacinth_PastellBlue_Big.fbx.meta
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -110,5 +114,9 @@ AssetOrigin:
   productId: 325074
   packageName: 'DEMO: Low Poly Flower Pack'
   packageVersion: 1.0
+<<<<<<<< HEAD:Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Dandelion_Small.fbx.meta
   assetPath: Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Dandelion_Small.fbx
+========
+  assetPath: Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Hyacinth_PastellBlue_Big.fbx
+>>>>>>>> 8f130a905a8ccedee34efcf418e80718b9b533f0:Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Hyacinth_PastellBlue_Big.fbx.meta
   uploadId: 770978
