@@ -8,6 +8,12 @@ TagManager:
   - RangedEnemy
   - MeleeEnemy
   - Fragment
+  - Projectile
+  - Interactuable
+  - Interactable
+  - Grass
+  - Tomatoes
+  - Gallina
   layers:
   - Default
   - TransparentFX
@@ -16,7 +22,7 @@ TagManager:
   - Water
   - UI
   - WhatIsGround
-  - 
+  - Interactuable
   - 
   - 
   - 

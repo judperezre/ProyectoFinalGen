@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6ef62a8c30db2f54c84944ddc6343e49
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302314
+  packageName: VFX Graph - Stat Scroll
+  packageVersion: 1.0
+  assetPath: Assets/TwoUncleVFX/ScenesURP/StatsScroll.unity
+  uploadId: 710790
