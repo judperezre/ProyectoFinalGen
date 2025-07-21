@@ -11,11 +11,17 @@ public class MainManagerMenu : MonoBehaviour
     public GameObject canvasLogo;
     public GameObject canvasMainMenu;
 
+    void Start()
+    {
+        AudioManager.Instance.PlayMenuMusic();
+    }
+
     public void Jugar()
     {
         AudioManager.Instance.PlayPlaySound(); // ← sonido especial solo para Jugar
+        AudioManager.Instance.StopMusic();
         //StartCoroutine(CambiarPanelConDelay(setupPanel));
-        SceneManager.LoadScene("Enemies"); // reemplaza por el nombre de la escena del juego
+        SceneManager.LoadScene("SceneHouse"); // reemplaza por el nombre de la escena del juego
     }
 
     public void ComoJugar()
