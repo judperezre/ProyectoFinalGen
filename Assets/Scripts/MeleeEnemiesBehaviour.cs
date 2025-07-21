@@ -8,9 +8,12 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
     public Transform player;
     public LayerMask whatIsGround, whatIsPlayer;
     public float health;
+    private Coroutine walkPointTimeoutCoroutine;
+    private PlayerController playerHealth;
 
     public int damage = 10;
     public bool canDamage;
+    public bool isIdleDone;
 
     //Animations
     [SerializeField]
@@ -37,6 +40,7 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
     {
         player = GameObject.Find("Player").transform;
         agent = GetComponent<NavMeshAgent>();
+        agent.updateRotation = false;
     }
 
     private void Update()
@@ -49,8 +53,15 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
         if (!isPlayerInSightRange && !isPlayerInAttackRange)
         {
+            //Idle
+            if (speed < 0.5f && isIdleDone == false)
+            {
+                StartCoroutine("IdleTimer");
+            }
+            
             meleeAttackAnimator.SetBool("isPlayerInAttackRange", false);
             Patrolling();
+            isIdleDone = false;
         }
 
         if (isPlayerInSightRange && !isPlayerInAttackRange)
@@ -63,20 +74,13 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
             meleeAttackAnimator.SetBool("isPlayerInAttackRange", true);
             AttackPlayer();
         }
+        
+
+            AlignToGround();
     }
 
     private void Patrolling()
     {
-        agent.isStopped = false;
-
-        Vector3 dir = agent.steeringTarget - transform.position;
-
-        if (dir.sqrMagnitude > 0.01f)
-        {
-            Quaternion lookRotation = Quaternion.LookRotation(dir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
-        }
-
         if (!walkPointSet)
         {
             SearchWalkPoint();
@@ -85,6 +89,32 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
         if (walkPointSet)
         {
             agent.SetDestination(walkPoint);
+
+            Vector3 dir = agent.steeringTarget - transform.position;
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                Debug.DrawRay(transform.position + Vector3.up * 0.5f, Vector3.down * 2f, Color.red);
+
+                Ray ray = new Ray(transform.position + Vector3.up * 0.5f, Vector3.down);
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit, 2f, whatIsGround))
+                {
+
+                    Vector3 normal = hit.normal;
+                    Quaternion lookRotation = Quaternion.LookRotation(dir, normal);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
+                }
+                else
+                {
+                    Debug.LogWarning("Raycast no golpea nada bajo el enemigo");
+                }
+            }
+
+            if (walkPointTimeoutCoroutine == null)
+            {
+                walkPointTimeoutCoroutine = StartCoroutine(WalkPointTimeout());
+            }
         }
 
         Vector3 distanceToWalkPoint = transform.position - walkPoint;
@@ -92,7 +122,15 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
         if (distanceToWalkPoint.magnitude < 1f)
         {
             walkPointSet = false;
+
+            if (walkPointTimeoutCoroutine != null)
+            {
+                StopCoroutine(walkPointTimeoutCoroutine);
+                walkPointTimeoutCoroutine = null;
+            }
         }
+
+        AlignToGround();
     }
 
     private void SearchWalkPoint()
@@ -111,16 +149,28 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
     private void ChasePlayer()
     {
+        transform.LookAt(player);
         agent.isStopped = false;
         agent.SetDestination(player.position);
+        AlignToGround();
     }
     private void AttackPlayer()
     {
         //Make sure enemy doesn't move
+        transform.LookAt(player);
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
         meleeAttackAnimator.SetFloat("MoveSpeed", 0f);
+        
+        //Enemy inclination while attacking
 
+        Vector3 direction = player.position - transform.position;
+        direction.y = 0f;
+
+        if (direction != Vector3.zero) 
+        {
+            transform.rotation = Quaternion.LookRotation(direction);
+        }
 
         if (!alreadyAttacked)
         {
@@ -174,7 +224,7 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
     {
         if (canDamage && other.CompareTag("Player"))
         {
-            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
+            playerHealth = other.GetComponent<PlayerController>();
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(damage);
@@ -186,6 +236,53 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
     private void DamageToPlayer() 
     {
         OnTriggerEnter(player.GetComponent<Collider>());
+    }
+
+    private void AlignToGround()
+    {
+        // Lanza un raycast hacia abajo desde un poco arriba del enemigo
+        RaycastHit hit;
+        Vector3 rayOrigin = transform.position + Vector3.up * 1f;
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, 3f, whatIsGround))
+        {
+            // Debug del punto de impacto
+            Debug.DrawRay(hit.point, hit.normal, Color.green);
+
+            // Calcula rotación que mire hacia adelante pero con la normal correcta
+            Vector3 forwardProjected = Vector3.ProjectOnPlane(transform.forward, hit.normal).normalized;
+            if (forwardProjected.sqrMagnitude > 0.001f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(forwardProjected, hit.normal);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+            }
+        }
+    }
+
+    private IEnumerator IdleTimer() 
+    {
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        meleeAttackAnimator.SetFloat("MoveSpeed", 0f);
+
+        yield return new WaitForSeconds(10f);
+        isIdleDone = true;
+        agent.isStopped = false;
+    }
+    private IEnumerator WalkPointTimeout()
+    {
+        yield return new WaitForSeconds(5f);
+
+        // Verificamos si todavía está lejos
+        Vector3 distanceToWalkPoint = transform.position - walkPoint;
+
+        if (distanceToWalkPoint.magnitude >= 1f)
+        {
+            Debug.Log("No se pudo alcanzar el punto, buscando uno nuevo.");
+            walkPointSet = false;
+        }
+
+        // Reseteamos la referencia
+        walkPointTimeoutCoroutine = null;
     }
 
 }

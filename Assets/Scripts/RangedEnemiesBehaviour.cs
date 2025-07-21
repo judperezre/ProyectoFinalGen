@@ -11,6 +11,8 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     public GameObject projectile;
     public Transform arrowPoint;
     public float health;
+    private Coroutine walkPointTimeoutCoroutine;
+    private bool isIdleDone;
 
     //animations
 
@@ -25,7 +27,8 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     public float walkPointRange;
 
     //Attacks
-
+    private Vector3 previousPlayerPos;
+    private Vector3 estimatedPlayerVelocity;
     public float timeBetweenAttacks;
     bool alreadyAttacked;
 
@@ -38,6 +41,14 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     {
         player = GameObject.Find("Player").transform;
         agent = GetComponent<NavMeshAgent>();
+        agent.updateRotation = false;
+    }
+
+    private void FixedUpdate()
+    {
+        Vector3 currentPlayerPos = player.transform.position;
+        estimatedPlayerVelocity = (currentPlayerPos - previousPlayerPos) / Time.deltaTime;
+        previousPlayerPos = currentPlayerPos;
     }
     private void Update()
     {
@@ -49,8 +60,15 @@ public class RangedEnemiesBehaviour : MonoBehaviour
 
         if (!isPlayerInSightRange && !isPlayerInAttackRange)
         {
+            //Idle
+            if (speed < 0.5f && isIdleDone == false)
+            {
+                StartCoroutine("IdleTimer");
+            }
+
             shootingAnimator.SetBool("isPlayerInAttackRange", false);
             Patrolling();
+            isIdleDone = false;
         }
 
         if (isPlayerInSightRange && !isPlayerInAttackRange)
@@ -62,18 +80,13 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         {
             AttackPlayer();
         }
+
+        AlignToGround();
+
     }
 
     private void Patrolling()
     {
-        Vector3 dir = agent.steeringTarget - transform.position;
-
-        if (dir.sqrMagnitude > 0.01f)
-        {
-            Quaternion lookRotation = Quaternion.LookRotation(dir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
-        }
-
         if (!walkPointSet)
         {
             SearchWalkPoint();
@@ -83,6 +96,32 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         {
             agent.SetDestination(walkPoint);
 
+            Vector3 dir = agent.steeringTarget - transform.position;
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                Debug.DrawRay(transform.position + Vector3.up * 0.5f, Vector3.down * 2f, Color.red);
+
+                Ray ray = new Ray(transform.position + Vector3.up * 0.5f, Vector3.down);
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit, 2f, whatIsGround))
+                {
+
+                    Vector3 normal = hit.normal;
+                    Quaternion lookRotation = Quaternion.LookRotation(dir, normal);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
+                }
+                else
+                {
+                    Debug.LogWarning("Raycast no golpea nada bajo el enemigo");
+                }
+            }
+
+            // Si no hay una corutina de timeout activa, arrancarla
+            if (walkPointTimeoutCoroutine == null)
+            {
+                walkPointTimeoutCoroutine = StartCoroutine(WalkPointTimeout());
+            }
         }
 
         Vector3 distanceToWalkPoint = transform.position - walkPoint;
@@ -90,7 +129,16 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         if (distanceToWalkPoint.magnitude < 1f)
         {
             walkPointSet = false;
+
+            // Cancelar la corutina si llegó bien
+            if (walkPointTimeoutCoroutine != null)
+            {
+                StopCoroutine(walkPointTimeoutCoroutine);
+                walkPointTimeoutCoroutine = null;
+            }
         }
+
+        AlignToGround();
     }
 
     private void SearchWalkPoint()
@@ -112,32 +160,36 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         
         agent.isStopped = false;
         agent.SetDestination(player.position);
+        AlignToGround();
 
     }
     private void AttackPlayer()
     {
-        //Make sure enemy doesn't move
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
 
+        Vector3 playerPos = player.transform.position + Vector3.up * 1.2f;
+
+        float projectileSpeed = 15f;
+        float distanceToPlayer = Vector3.Distance(transform.position, playerPos);
+        float predictionTime = distanceToPlayer / projectileSpeed;
+
+        Vector3 predictedPos = playerPos + estimatedPlayerVelocity * predictionTime;
+
+        Vector3 directionToTarget = predictedPos - transform.position;
+        Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
+        float rotationSpeed = 5f; 
+
+        transform.rotation = Quaternion.Lerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
 
         if (!alreadyAttacked)
         {
-
-            ///Ranged Attack code:
-
-
-            transform.LookAt(player);
             shootingAnimator.SetBool("isPlayerInAttackRange", true);
             shootingAnimator.SetFloat("MoveSpeed", 0f);
-
-            ///
-
 
             alreadyAttacked = true;
             Invoke(nameof(ResetAttack), timeBetweenAttacks);
         }
-
     }
 
     private void ResetAttack()
@@ -178,8 +230,54 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     {
         GameObject arrow = Instantiate(projectile, arrowPoint.position, Quaternion.identity, arrowPoint);
         arrow.transform.parent = null;
-        arrow.GetComponent<Rigidbody>().AddForce(transform.forward * 25f, ForceMode.Impulse);
-        arrow.GetComponent<Rigidbody>().AddForce(transform.up * 8f, ForceMode.Impulse);
+        arrow.GetComponent<Rigidbody>().AddForce(transform.forward * 45f, ForceMode.Impulse);
+    }
+
+    private void AlignToGround()
+    {
+        // Lanza un raycast hacia abajo desde un poco arriba del enemigo
+        RaycastHit hit;
+        Vector3 rayOrigin = transform.position + Vector3.up * 1f;
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, 3f, whatIsGround))
+        {
+            // Debug del punto de impacto
+            Debug.DrawRay(hit.point, hit.normal, Color.green);
+
+            // Calcula rotación que mire hacia adelante pero con la normal correcta
+            Vector3 forwardProjected = Vector3.ProjectOnPlane(transform.forward, hit.normal).normalized;
+            if (forwardProjected.sqrMagnitude > 0.001f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(forwardProjected, hit.normal);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+            }
+        }
+    }
+
+    private IEnumerator IdleTimer()
+    {
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        shootingAnimator.SetFloat("MoveSpeed", 0f);
+
+        yield return new WaitForSeconds(10f);
+        isIdleDone = true;
+        agent.isStopped = false;
+    }
+
+    private IEnumerator WalkPointTimeout()
+    {
+        yield return new WaitForSeconds(5f);
+
+        // Verificamos si todavía está lejos
+        Vector3 distanceToWalkPoint = transform.position - walkPoint;
+
+        if (distanceToWalkPoint.magnitude >= 1f)
+        {
+            walkPointSet = false;
+        }
+
+        // Reseteamos la referencia
+        walkPointTimeoutCoroutine = null;
     }
 
 }
