@@ -9,6 +9,7 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
     public LayerMask whatIsGround, whatIsPlayer;
     public float health;
     private Coroutine walkPointTimeoutCoroutine;
+    private PlayerController playerHealth;
 
     public int damage = 10;
     public bool canDamage;
@@ -52,7 +53,8 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
         if (!isPlayerInSightRange && !isPlayerInAttackRange)
         {
-            if (speed < 0.8f && isIdleDone == false)
+            //Idle
+            if (speed < 0.5f && isIdleDone == false)
             {
                 StartCoroutine("IdleTimer");
             }
@@ -222,7 +224,7 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
     {
         if (canDamage && other.CompareTag("Player"))
         {
-            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
+            playerHealth = other.GetComponent<PlayerController>();
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(damage);
