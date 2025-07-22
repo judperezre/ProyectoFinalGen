@@ -11,7 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainMenuScene.unity
     guid: d566ba6f1ac0f2b4fbcae25e569b32b3
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SceneHouse.unity
     guid: 7e253550a6f4e3440a5e6b8269d19710
   - enabled: 1
@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/DanielPrueba.unity
     guid: 0e00a37444cb59748a34561c6ee67052
+  - enabled: 1
+    path: Assets/Scenes/SceneHouse 1.unity
+    guid: 6dee60b1dcd645e4e8a47c301b214e31
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
