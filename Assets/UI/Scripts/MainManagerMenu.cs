@@ -21,7 +21,7 @@ public class MainManagerMenu : MonoBehaviour
         AudioManager.Instance.PlayPlaySound(); // ← sonido especial solo para Jugar
         AudioManager.Instance.StopMusic();
         //StartCoroutine(CambiarPanelConDelay(setupPanel));
-        SceneManager.LoadScene("SceneHouse"); // reemplaza por el nombre de la escena del juego
+        SceneManager.LoadScene(2); // reemplaza por el nombre de la escena del juego
     }
 
     public void ComoJugar()
@@ -35,6 +35,8 @@ public class MainManagerMenu : MonoBehaviour
     }
     public void OcultarComoJugar()
     {
+
+        AudioManager.Instance.PlayClick();
         panelComoJugar.SetActive(false);
         canvasImage.SetActive(true);
         canvasLogo.SetActive(true);
@@ -51,6 +53,7 @@ public class MainManagerMenu : MonoBehaviour
 
     public void OcultarHistoria()
     {
+        AudioManager.Instance.PlayClick();
         panelHistoria.SetActive(false);
         canvasImage.SetActive(true);
         canvasLogo.SetActive(true);
@@ -67,6 +70,7 @@ public class MainManagerMenu : MonoBehaviour
     }
     public void OcultarCreditos()
     {
+        AudioManager.Instance.PlayClick();
         panelCreditos.SetActive(false);
         canvasImage.SetActive(true);
         canvasLogo.SetActive(true);
