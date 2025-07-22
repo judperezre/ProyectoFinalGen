@@ -12,6 +12,7 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     public Transform arrowPoint;
     public float health;
     private Coroutine walkPointTimeoutCoroutine;
+    private bool isIdleDone;
 
     //animations
 
@@ -26,7 +27,8 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     public float walkPointRange;
 
     //Attacks
-
+    private Vector3 previousPlayerPos;
+    private Vector3 estimatedPlayerVelocity;
     public float timeBetweenAttacks;
     bool alreadyAttacked;
 
@@ -41,6 +43,13 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         agent.updateRotation = false;
     }
+
+    private void FixedUpdate()
+    {
+        Vector3 currentPlayerPos = player.transform.position;
+        estimatedPlayerVelocity = (currentPlayerPos - previousPlayerPos) / Time.deltaTime;
+        previousPlayerPos = currentPlayerPos;
+    }
     private void Update()
     {
         float speed = agent.velocity.magnitude;
@@ -51,8 +60,15 @@ public class RangedEnemiesBehaviour : MonoBehaviour
 
         if (!isPlayerInSightRange && !isPlayerInAttackRange)
         {
+            //Idle
+            if (speed < 0.5f && isIdleDone == false)
+            {
+                StartCoroutine("IdleTimer");
+            }
+
             shootingAnimator.SetBool("isPlayerInAttackRange", false);
             Patrolling();
+            isIdleDone = false;
         }
 
         if (isPlayerInSightRange && !isPlayerInAttackRange)
@@ -66,6 +82,7 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         }
 
         AlignToGround();
+
     }
 
     private void Patrolling()
@@ -89,7 +106,6 @@ public class RangedEnemiesBehaviour : MonoBehaviour
 
                 if (Physics.Raycast(ray, out hit, 2f, whatIsGround))
                 {
-                    Debug.Log("Raycast hit: " + hit.collider.gameObject.name);
 
                     Vector3 normal = hit.normal;
                     Quaternion lookRotation = Quaternion.LookRotation(dir, normal);
@@ -149,28 +165,31 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     }
     private void AttackPlayer()
     {
-        //Make sure enemy doesn't move
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
 
+        Vector3 playerPos = player.transform.position + Vector3.up * 1.2f;
+
+        float projectileSpeed = 15f;
+        float distanceToPlayer = Vector3.Distance(transform.position, playerPos);
+        float predictionTime = distanceToPlayer / projectileSpeed;
+
+        Vector3 predictedPos = playerPos + estimatedPlayerVelocity * predictionTime;
+
+        Vector3 directionToTarget = predictedPos - transform.position;
+        Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
+        float rotationSpeed = 5f; 
+
+        transform.rotation = Quaternion.Lerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
 
         if (!alreadyAttacked)
         {
-
-            ///Ranged Attack code:
-
-
-            transform.LookAt(player);
             shootingAnimator.SetBool("isPlayerInAttackRange", true);
             shootingAnimator.SetFloat("MoveSpeed", 0f);
-
-            ///
-
 
             alreadyAttacked = true;
             Invoke(nameof(ResetAttack), timeBetweenAttacks);
         }
-
     }
 
     private void ResetAttack()
@@ -211,8 +230,7 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     {
         GameObject arrow = Instantiate(projectile, arrowPoint.position, Quaternion.identity, arrowPoint);
         arrow.transform.parent = null;
-        arrow.GetComponent<Rigidbody>().AddForce(transform.forward * 25f, ForceMode.Impulse);
-        arrow.GetComponent<Rigidbody>().AddForce(transform.up * 8f, ForceMode.Impulse);
+        arrow.GetComponent<Rigidbody>().AddForce(transform.forward * 45f, ForceMode.Impulse);
     }
 
     private void AlignToGround()
@@ -235,6 +253,17 @@ public class RangedEnemiesBehaviour : MonoBehaviour
         }
     }
 
+    private IEnumerator IdleTimer()
+    {
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        shootingAnimator.SetFloat("MoveSpeed", 0f);
+
+        yield return new WaitForSeconds(10f);
+        isIdleDone = true;
+        agent.isStopped = false;
+    }
+
     private IEnumerator WalkPointTimeout()
     {
         yield return new WaitForSeconds(5f);
@@ -244,7 +273,6 @@ public class RangedEnemiesBehaviour : MonoBehaviour
 
         if (distanceToWalkPoint.magnitude >= 1f)
         {
-            Debug.Log("No se pudo alcanzar el punto, buscando uno nuevo.");
             walkPointSet = false;
         }
 
