@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!4 &419071983 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5622930960322085573, guid: 458fd7d0b17d98f43903c9b09d6d3512, type: 3}
+  m_PrefabInstance: {fileID: 805862170}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &805862170
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -131,10 +136,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RangedEnemy
       objectReference: {fileID: 0}
-    - target: {fileID: 6890836061128867768, guid: 458fd7d0b17d98f43903c9b09d6d3512, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -20.38
-      objectReference: {fileID: 0}
+    - target: {fileID: 4110100559314471688, guid: 458fd7d0b17d98f43903c9b09d6d3512, type: 3}
+      propertyPath: arrowPoint
+      value: 
+      objectReference: {fileID: 419071983}
     - target: {fileID: 7498618575543600993, guid: 458fd7d0b17d98f43903c9b09d6d3512, type: 3}
       propertyPath: m_LocalPosition.x
       value: 24.61
@@ -635,7 +640,7 @@ PrefabInstance:
     - target: {fileID: 4088482440575799277, guid: 1029104a14ccc10448e9b13c6277fb1e, type: 3}
       propertyPath: projectile
       value: 
-      objectReference: {fileID: 5462181201794676206, guid: 04aa4d902ac7119449f1c3cdccf39297, type: 3}
+      objectReference: {fileID: 5462181201794676206, guid: 3c29b10e12edc9544beee0d6e1fddd3a, type: 3}
     - target: {fileID: 7452801274716732969, guid: 1029104a14ccc10448e9b13c6277fb1e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 19.770596
@@ -695,7 +700,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5735011443888010012, guid: 8bb9a0a94e32fd8418fa31f5ffc4bc20, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 23.65
+      value: 25.21
       objectReference: {fileID: 0}
     - target: {fileID: 5735011443888010012, guid: 8bb9a0a94e32fd8418fa31f5ffc4bc20, type: 3}
       propertyPath: m_LocalPosition.y
@@ -703,7 +708,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5735011443888010012, guid: 8bb9a0a94e32fd8418fa31f5ffc4bc20, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 22.13
+      value: 22.73
       objectReference: {fileID: 0}
     - target: {fileID: 5735011443888010012, guid: 8bb9a0a94e32fd8418fa31f5ffc4bc20, type: 3}
       propertyPath: m_LocalRotation.w

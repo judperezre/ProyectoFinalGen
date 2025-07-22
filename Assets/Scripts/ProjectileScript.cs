@@ -7,17 +7,24 @@ public class ProjectileScript : MonoBehaviour
     public int damage = 15;
     private Collider player;
     public bool canDamage;
+    public GameObject projectileVFX;
     void Start()
     {
        player = GetComponent<Collider>();
         Destroy(gameObject, 10f);
+
+        if (projectileVFX != null)
+        {
+            GameObject vfx = Instantiate(projectileVFX, transform.position, transform.rotation);
+            vfx.transform.SetParent(transform);
+            vfx.transform.Rotate(-90f, 0f, 0f);
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
         StartDamage();
-        OnTriggerEnter(player);
     }
 
     private void StartDamage()
