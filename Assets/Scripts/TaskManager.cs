@@ -32,6 +32,7 @@ public class TaskManager : MonoBehaviour
     {
         remaining = Mathf.Max(0, remaining - 1);
         UpdateUI();
+
     }
 
     private void UpdateUI()

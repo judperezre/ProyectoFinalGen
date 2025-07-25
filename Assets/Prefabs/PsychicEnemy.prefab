@@ -175,7 +175,7 @@ MonoBehaviour:
   whatIsPlayer:
     serializedVersion: 2
     m_Bits: 8
-  projectile: {fileID: 6323945536387981989, guid: 8dbc2d915e5adb04890a02ba784e67ca, type: 3}
+  projectile: {fileID: 5462181201794676206, guid: 3c29b10e12edc9544beee0d6e1fddd3a, type: 3}
   arrowPoint: {fileID: 540400236698972513}
   health: 100
   dangerZone: {fileID: 1234295809843066469, guid: ed82fc765b976f3418a832c274230e42, type: 3}

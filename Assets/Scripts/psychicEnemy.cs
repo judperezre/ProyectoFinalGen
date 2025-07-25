@@ -1,9 +1,10 @@
 ﻿
+using Assets.Scripts;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class psychicEnemy : MonoBehaviour
+public class psychicEnemy : MonoBehaviour, IDamageable
 {
     public NavMeshAgent agent;
     public Transform player;
@@ -14,6 +15,7 @@ public class psychicEnemy : MonoBehaviour
     private Coroutine walkPointTimeoutCoroutine;
     private bool isIdleDone;
     public GameObject dangerZone;
+    public bool IsAlive => health > 0;
 
     //animations
 

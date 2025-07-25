@@ -1,3 +1,5 @@
+using Assets.Scripts;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -58,6 +60,7 @@ public class PlayerController : MonoBehaviour
     public float powerForce = 15f;
     public float specialCooldown = 3f;
     private float specialCooldownTimer = 0f;
+    private bool canDamage;
 
     // AUDIO
     [Header("Audio")]
@@ -337,7 +340,23 @@ public class PlayerController : MonoBehaviour
             healthSlider.value = currentHealth;
     }
 
-    
+    public void EnemyHit()
+    {
+        float attackRange = 2f;
+        Ray ray = new Ray(transform.position + Vector3.up, transform.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, attackRange))
+        {
+            IDamageable damageable = hit.collider.GetComponent<IDamageable>();
+            if (damageable != null && damageable.IsAlive)
+            {
+                damageable.TakeDamage(25);
+            }
+        }
+    }
+
+
+
+
 
 
 }

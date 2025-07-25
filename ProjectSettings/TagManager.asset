@@ -14,6 +14,7 @@ TagManager:
   - Grass
   - Tomatoes
   - Gallina
+  - PsychicEnemy
   layers:
   - Default
   - TransparentFX

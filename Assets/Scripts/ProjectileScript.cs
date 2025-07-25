@@ -4,7 +4,7 @@ public class ProjectileScript : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-    public int damage = 15;
+    public int damage = 6;
     private Collider player;
     public bool canDamage;
     public GameObject projectileVFX;

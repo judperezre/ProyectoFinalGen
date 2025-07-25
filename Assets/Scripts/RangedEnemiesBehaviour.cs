@@ -1,9 +1,10 @@
+using Assets.Scripts;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Assertions.Must;
 
-public class RangedEnemiesBehaviour : MonoBehaviour
+public class RangedEnemiesBehaviour : MonoBehaviour, IDamageable
 {
     public NavMeshAgent agent;
     public Transform player;
@@ -13,6 +14,7 @@ public class RangedEnemiesBehaviour : MonoBehaviour
     public float health;
     private Coroutine walkPointTimeoutCoroutine;
     private bool isIdleDone;
+    public bool IsAlive => health > 0;
 
     //animations
 

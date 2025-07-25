@@ -8,6 +8,8 @@ public class ActivatePortal : MonoBehaviour
     public GameObject portal;
 
     public DialogoDespuesTurmalina dialogoFinal;
+    public Transform jugador;
+    public Transform jugadorMago;
 
     public string[] notaFrases = {
         "Sé que existe el destino, por lo que confío esta turmalina morada tomará el camino correcto. Así pues, con su poder, dotará de valentía a quien la merezca.",
@@ -25,6 +27,8 @@ public class ActivatePortal : MonoBehaviour
 
             // Mostramos el diálogo de la nota y luego llamamos a AbrirPortal cuando termine
             notaController.MostrarDialogo(notaFrases, AbrirPortal);
+            jugador.gameObject.SetActive(false);
+            jugadorMago.gameObject.SetActive(true);
 
             gameObject.SetActive(false); // Esconde la turmalina
         }

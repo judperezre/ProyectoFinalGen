@@ -15,6 +15,8 @@ public class DialogoDespuesTurmalina : MonoBehaviour
     public void ActivarDialogo()
     {
         StartCoroutine(MostrarDialogoConDelay());
+
+
     }
 
     IEnumerator MostrarDialogoConDelay()

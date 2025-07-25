@@ -1,8 +1,9 @@
+using Assets.Scripts;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class MeleeEnemiesBehaviour : MonoBehaviour
+public class MeleeEnemiesBehaviour : MonoBehaviour, IDamageable
 {
     public NavMeshAgent agent;
     public Transform player;
@@ -11,9 +12,10 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
     private Coroutine walkPointTimeoutCoroutine;
     private PlayerController playerHealth;
 
-    public int damage = 10;
+    public int damage = 5;
     public bool canDamage;
     public bool isIdleDone;
+    public bool IsAlive => health > 0;
 
     //Animations
     [SerializeField]
@@ -193,7 +195,8 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
         if (health <= 0)
         {
-            Invoke(nameof(DestroyEnemy), 0.5f);
+            meleeAttackAnimator.SetBool("isDead", true);
+            Invoke(nameof(DestroyEnemy), 10f);
         }
     }
     public void DestroyEnemy()
@@ -277,7 +280,6 @@ public class MeleeEnemiesBehaviour : MonoBehaviour
 
         if (distanceToWalkPoint.magnitude >= 1f)
         {
-            Debug.Log("No se pudo alcanzar el punto, buscando uno nuevo.");
             walkPointSet = false;
         }
 
