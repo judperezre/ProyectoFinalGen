@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Daisy_Single.fbx.meta
 guid: d3e86e8312025d54ea4b2aff32264f24
+========
+guid: 49f1eb77d1eac2b4b951528b0b494a91
+>>>>>>>> 8f130a905a8ccedee34efcf418e80718b9b533f0:Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Dandelion_Small.fbx.meta
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -110,5 +114,9 @@ AssetOrigin:
   productId: 325074
   packageName: 'DEMO: Low Poly Flower Pack'
   packageVersion: 1.0
+<<<<<<<< HEAD:Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Daisy_Single.fbx.meta
   assetPath: Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Daisy_Single.fbx
+========
+  assetPath: Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Dandelion_Small.fbx
+>>>>>>>> 8f130a905a8ccedee34efcf418e80718b9b533f0:Assets/Emilulz_Assets/DEMOLowPolyFlowers/Assets/SM_Dandelion_Small.fbx.meta
   uploadId: 770978
