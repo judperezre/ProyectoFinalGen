@@ -4,7 +4,7 @@ using UnityEngine;
 public class DialogoDespuesTurmalina : MonoBehaviour
 {
     public DialogoBase dialogoBase; // Asigna este mismo GameObject
-    public string[] lineasFinales;  // AquÌ escribes las lÌneas finales en el inspector
+    public string[] lineasFinales;  // Aqu√≠ escribes las l√≠neas finales en el inspector
     public float delayAntesDialogo = 2f; // Tiempo tras aparecer el portal
 
     void Start()
@@ -15,17 +15,15 @@ public class DialogoDespuesTurmalina : MonoBehaviour
     public void ActivarDialogo()
     {
         StartCoroutine(MostrarDialogoConDelay());
-
-
     }
 
     IEnumerator MostrarDialogoConDelay()
     {
         yield return new WaitForSeconds(delayAntesDialogo);
 
-        gameObject.SetActive(true); // Activa el cuadro de di·logo
-        dialogoBase.lineas = lineasFinales; // Asigna las nuevas lÌneas
-        dialogoBase.MostrarDialogo(dialogoBase.lineas); // Llama el mÈtodo de inicio del di·logo
+        gameObject.SetActive(true); // Activa el cuadro de di√°logo
+        dialogoBase.lineas = lineasFinales; // Asigna las nuevas l√≠neas
+        dialogoBase.MostrarDialogo(dialogoBase.lineas); // Llama el m√©todo de inicio del di√°logo
     }
 }
 

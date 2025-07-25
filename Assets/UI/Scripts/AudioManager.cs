@@ -1,36 +1,43 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
 
+    [Header("Sonidos")]
     public AudioClip clickSound;
-    public AudioClip playSound; //// <-- sonido especial para el botón Jugar
-    public AudioClip menuMusic;
+    public AudioClip playSound; // Sonido especial para el botÃ³n Jugar
 
-    private AudioSource audioSource; // Para efectos de sonido
-    private AudioSource musicSource; // Para música de fondo en el menú
+    [Header("MÃºsica de Fondo")]
+    public AudioClip menuMusic;
+    public AudioClip escenaCasa;     // Agregado
+    public AudioClip nivel1Music;     // Agregado
+    public AudioClip finalMusic;      // Agregado
+
+    private AudioSource audioSource; // Para efectos de sonido (SFX)
+    private AudioSource musicSource; // Para mÃºsica de fondo
 
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Opcional si cambia de escena
+            DontDestroyOnLoad(gameObject); // Permite que el AudioManager sobreviva al cambio de escenas
         }
         else
         {
             Destroy(gameObject);
+            return;
         }
 
-
-        // Creamos dos fuentes de audio: una para SFX y otra para música
+        // Inicializa las fuentes de audio
         audioSource = gameObject.AddComponent<AudioSource>();
         musicSource = gameObject.AddComponent<AudioSource>();
 
-        musicSource.loop = true; // La música del menú debe repetirse
-        musicSource.volume = 0.5f; // Ajustar el volumen
+        musicSource.loop = true;
+        musicSource.volume = 0.2f;
     }
+
 
     public void PlayClick()
     {
@@ -38,7 +45,7 @@ public class AudioManager : MonoBehaviour
             audioSource.PlayOneShot(clickSound);
     }
 
-    public void PlayPlaySound()  // <-- método específico para el botón Jugar
+    public void PlayPlaySound()
     {
         if (playSound != null)
             audioSource.PlayOneShot(playSound);
@@ -46,9 +53,18 @@ public class AudioManager : MonoBehaviour
 
     public void PlayMenuMusic()
     {
-        if (menuMusic != null && !musicSource.isPlaying)
+        PlayMusic(menuMusic);
+    }
+
+    //MÃ©todo general para reproducir cualquier mÃºsica
+    public void PlayMusic(AudioClip clip)
+    {
+        if (clip != null)
         {
-            musicSource.clip = menuMusic;
+            if (musicSource.isPlaying)
+                musicSource.Stop();
+
+            musicSource.clip = clip;
             musicSource.Play();
         }
     }
@@ -58,3 +74,4 @@ public class AudioManager : MonoBehaviour
         musicSource.Stop();
     }
 }
+

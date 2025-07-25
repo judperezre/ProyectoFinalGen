@@ -4,37 +4,40 @@ using UnityEngine;
 public class FallingRock : MonoBehaviour
 {
     [Header("Falling Settings")]
-    [Tooltip("Retraso (en segundos) antes de que la piedra caiga")]
     public float fallDelay = 1f;
-    [Tooltip("Si es true, la piedra cae automáticamente al Start()")]
     public bool autoFall = true;
 
     [Header("Impact Effects")]
-    [Tooltip("Prefab de partículas o efecto que se instanciará al chocar con el suelo")]
     public GameObject impactEffectPrefab;
-    [Tooltip("Sonido que sonará al impactar")]
     public AudioClip impactSound;
+
+    [Header("Diálogo")]
+    public DialogoBase dialogoBase;
+    public string[] dialogoAlCaer;
+    public string[] dialogoAlAcercarse;
+
+    [Header("Jugador")]
+    public Transform jugador;
+    public float distanciaDialogo = 5f;
 
     private Rigidbody rb;
     private AudioSource audioSource;
     private bool hasFallen = false;
+    private bool yaMostroDialogoAlAcercarse = false;
 
     void Awake()
     {
-        // Nos aseguramos de que haya un Rigidbody
         rb = GetComponent<Rigidbody>();
         if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
         rb.isKinematic = true;
 
-        // Congelar posición X/Z y rotaciones
         rb.constraints = RigidbodyConstraints.FreezePositionX
                        | RigidbodyConstraints.FreezePositionZ
                        | RigidbodyConstraints.FreezeRotation;
 
-        // Creamos o recuperamos un AudioSource
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.spatialBlend = 1f; // sonido 3D
+        audioSource.spatialBlend = 1f;
     }
 
     void Start()
@@ -43,9 +46,21 @@ public class FallingRock : MonoBehaviour
             StartCoroutine(FallAfterDelay());
     }
 
-    /// <summary>
-    /// Llama a este método si quieres que la piedra caiga bajo demanda.
-    /// </summary>
+    void Update()
+    {
+        // Segundo diálogo: cuando jugador se acerca
+        if (hasFallen && !yaMostroDialogoAlAcercarse)
+        {
+            float distancia = Vector3.Distance(jugador.position, transform.position);
+
+            if (distancia < distanciaDialogo)
+            {
+                yaMostroDialogoAlAcercarse = true;
+                dialogoBase.MostrarDialogo(dialogoAlAcercarse);
+            }
+        }
+    }
+
     public void TriggerFall()
     {
         if (!hasFallen)
@@ -63,25 +78,19 @@ public class FallingRock : MonoBehaviour
     {
         if (!hasFallen) return;
 
-        // Debug: ver con qué colisiona
-        Debug.Log($"FallingRock colisionó con: {collision.collider.name} (tag: {collision.collider.tag})");
+        Debug.Log($"FallingRock colisionó con: {collision.collider.name}");
 
-        // Reproducir partículas
         if (impactEffectPrefab != null)
         {
-            Instantiate(
-                impactEffectPrefab,
-                collision.contacts[0].point,
-                Quaternion.identity
-            );
+            Instantiate(impactEffectPrefab, collision.contacts[0].point, Quaternion.identity);
         }
 
-        // Reproducir sonido de impacto
         if (impactSound != null)
         {
             audioSource.PlayOneShot(impactSound);
         }
 
-        
+        // Mostrar diálogo de impacto (una vez)
+        dialogoBase.MostrarDialogo(dialogoAlCaer);
     }
 }
